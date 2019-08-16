@@ -1,0 +1,39 @@
+
+table {
+  width: 75%;
+  border-collapse: collapse;
+}
+
+td {
+  width: 14.28%;
+  border: 6px solid #222;
+  border-radius: 90%
+}
+
+td::after {
+  content: "";
+  display: block;
+  margin-top: 100%;
+}
+
+td {
+  border: 6px solid #222;
+}
+
+
+tr:nth-of-type(1) td {
+  border-top-color: transparent;
+}
+
+td:hover {
+  background-color: #ffcc99;
+  cursor: pointer;
+}
+
+.playerUno {
+  background-color: #3399ff;
+}
+
+.playerDos {
+  background-color: #ff6666;
+}

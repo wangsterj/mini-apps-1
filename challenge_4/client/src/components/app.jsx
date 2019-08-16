@@ -1,0 +1,127 @@
+import React from 'react';
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    
+    this.state = {
+      board: [],
+      // player true = player 1, false = 2
+      player: true,
+      win: false
+    }
+  }
+
+  onClick(event) {
+    if (this.state.win) {
+      return;
+    }
+    var id = event.target.id;
+    var row = Math.floor(id/10);
+    var col = id%10;
+    var player = '';
+    var marker = 0;
+    var flag = true;
+
+    // checks which player's turn
+    if (this.state.player) {
+      player = 'playerUno';
+      marker = 1;
+    } else {
+      player = 'playerDos';
+      marker = -1;
+    }
+
+    // adds player's piece to the board
+    for (var role = 5; role >=0;role --) {
+      if (this.state.board[role][col] === 0) {
+        this.state.board[role][col] = marker;
+        document.getElementById(role.toString()+col.toString()).classList.add(player);
+        break;
+      }
+    }
+
+    // Check if winning move
+    if (this.checkWin(role,col)) {
+      document.getElementById('win').innerHTML=player+ " wins!";
+      this.state.win = true;
+    }
+
+    this.state.player = !this.state.player;
+  }
+ 
+  checkWin(Row,Col) {
+    var result = false;
+    // console.log(Row,Col)
+
+    // check for horizontal win
+    for (var col = 0; col < 4; col++) {
+      var sum = this.state.board[Row][col] + this.state.board[Row][col+1] + this.state.board[Row][col+2] + this.state.board[Row][col+3];
+      if (sum === 4 || sum === -4) {
+        result = true;
+      }
+    }
+
+    // Check for vertical win
+    for (var row = 0; row < 3; row++) {
+      var sum = this.state.board[row][Col] + this.state.board[row+1][Col] + this.state.board[row+2][Col] + this.state.board[row+3][Col];
+      if (sum === 4 || sum === -4) {
+        result = true;
+      }
+    }
+
+    // Check for major
+    var startRow = 0;
+    var startCol = Col - Row;
+    for (var iRow = startRow; iRow < 3; iRow++) {
+      var jCol = startCol + iRow;
+      if (jCol >=0 && jCol <= 6) {
+        var board = this.state.board;
+        var sum = board[iRow][jCol]+board[iRow+1][jCol+1]+board[iRow+2][jCol+2]+board[iRow+3][jCol+3];
+        if (sum === 4 || sum === -4) {
+          result = true;
+        }
+      }
+    }
+
+    // Check for minor
+    var startRow = 0;
+    var startCol = Col - Row;
+    for (var iRow = startRow; iRow < 3; iRow++) {
+      var jCol = startCol + iRow;
+      if (jCol >=0 && jCol <= 6) {
+        var board = this.state.board;
+        var sum = board[iRow][jCol]+board[iRow+1][jCol-1]+board[iRow+2][jCol-2]+board[iRow+3][jCol-3];
+        if (sum === 4 || sum === -4) {
+          result = true;
+        }
+      }
+    }
+    return result;
+  }
+
+  makeBoard() {
+    var DOMboard = [];
+    cell = [];
+    for (var row = 0; row < 6; row++) {
+      this.state.board[row] = [];
+      var cell = [];
+      for (var col = 0; col < 7; col++) {
+        this.state.board[row][col] = 0;
+        var id = row.toString() + col.toString();
+        cell.push(<td key = {id} id = {id} onClick={(event) => this.onClick.bind(this)(event)}></td>)
+      }
+      DOMboard.push(<tr key ={id} id = {row}>{cell}</tr>);
+    }
+    return DOMboard;
+  }
+
+  render() {
+    return (
+      <table id = 'table'>
+        {this.makeBoard.bind(this)()}
+      </table>
+    );
+  }
+}
+export default App;
