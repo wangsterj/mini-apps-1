@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 
 class App extends React.Component {
   constructor(props) {
@@ -17,11 +18,9 @@ class App extends React.Component {
       return;
     }
     var id = event.target.id;
-    var row = Math.floor(id/10);
     var col = id%10;
     var player = '';
     var marker = 0;
-    var flag = true;
 
     // checks which player's turn
     if (this.state.player) {
@@ -45,14 +44,40 @@ class App extends React.Component {
     if (this.checkWin(role,col)) {
       document.getElementById('win').innerHTML=player+ " wins!";
       this.state.win = true;
+      this.post();
     }
 
     this.state.player = !this.state.player;
   }
+
+  post() {
+    axios.post('http://localhost:3000/post', this.state.board)
+    .then(function (response) {
+      console.log("Posted board!");
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
+
+  get() {
+    axios.get('http://localhost:3000/get', {
+      params: {
+        ID: 123,
+      }
+    })
+    .then(function (response) {
+      var board = JSON.parse(response.data[0].board);
+      this.state.board = board;
+      console.log(JSON.parse(response.data[0].board));
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
  
   checkWin(Row,Col) {
     var result = false;
-    // console.log(Row,Col)
 
     // check for horizontal win
     for (var col = 0; col < 4; col++) {
@@ -102,7 +127,31 @@ class App extends React.Component {
 
   makeBoard() {
     var DOMboard = [];
-    cell = [];
+    var cell = [];
+    for (var row = 0; row < 6; row++) {
+      this.state.board[row] = [];
+      var cell = [];
+      for (var col = 0; col < 7; col++) {
+        this.state.board[row][col] = 0;
+        var id = row.toString() + col.toString();
+        cell.push(<td key = {id} id = {id} onClick={(event) => this.onClick.bind(this)(event)}></td>)
+      }
+      DOMboard.push(<tr key ={id} id = {row}>{cell}</tr>);
+    }
+    return DOMboard;
+  }
+
+  componentDidMount() {
+    // this.get();
+  }
+
+  rerender() {
+
+  }
+
+  reset() {
+    var DOMboard = [];
+    var cell = [];
     for (var row = 0; row < 6; row++) {
       this.state.board[row] = [];
       var cell = [];
@@ -118,10 +167,37 @@ class App extends React.Component {
 
   render() {
     return (
-      <table id = 'table'>
-        {this.makeBoard.bind(this)()}
-      </table>
+      <div>
+        <table id = 'table'>
+          {this.makeBoard.bind(this)()}
+        </table>
+          <button onClick = {this.post.bind(this)}>POST</button>
+          <button onClick = {this.get.bind(this)}>GET</button>
+          <button onClick = {this.reset.bind(this)}>RESET</button>
+      </div>
     );
   }
 }
+
+function Board(props) {
+  var board = props.board;
+  var DOMboard = [];
+  var cell = [];
+  for (var row = 0; row < 6; row++) {
+    var cell = [];
+    for (var col = 0; col < 7; col++) {
+      this.state.board[row][col] = 0;
+      var id = row.toString() + col.toString();
+      cell.push(<td key = {id} id = {id} onClick={(event) => this.onClick.bind(this)(event)}></td>)
+    }
+    DOMboard.push(<tr key ={id} id = {row}>{cell}</tr>);
+  }
+  return (
+      <div>
+        {DOMboard}
+      </div>
+    );
+};
+
+
 export default App;
